@@ -1,9 +1,8 @@
 # 👋 About Me — Personal Portfolio
 
 Interactive personal website with a fun easter egg.
-[![Live Demo](https://img.shields.io/badge/Live_Demo-Click_Here-6366f1?style=for-the-badge&logo=vercel&logoColor=white)](https://veterokk8.github.io/About-me/)
+
 [![Live Demo](https://img.shields.io/badge/Live_Demo-Click%20Here-6366f1?style=for-the-badge&logo=vercel&logoColor=white)](https://veterokk8.github.io/About-me/)
-**Live Demo**: [https://veterokk8.github.io/About-me/](https://veterokk8.github.io/About-me/)
 
 ---
 
