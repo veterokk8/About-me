@@ -59,8 +59,12 @@ function App() {
         }}
         style={{
           fontSize: '16px',
-          padding: '5px',
-          backgroundColor: 'rgb(227, 22, 22)'
+    padding: '8px 16px',
+    backgroundColor: '#f97316',  // 👈 оранжевый
+    color: '#fff',
+    border: 'none',
+    borderRadius: '8px',
+    cursor: 'pointer',
         }}
       >
         Yes
@@ -80,8 +84,12 @@ function App() {
           top: position.y,
           transition: 'all 0.2s ease',
           fontSize: '16px',
-          padding: '5px',
-          backgroundColor: '#26d05fc7'
+          padding: '8px 16px',
+    backgroundColor: '#3b82f6',  // 🔵 синий
+    color: '#fff',
+    border: 'none',
+    borderRadius: '8px',
+    cursor: 'pointer',
         }}
       >
         No
