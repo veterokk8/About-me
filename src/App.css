@@ -73,3 +73,19 @@
   background-color: white; /* При наведении фон меняется на белый */
   color: #c41919; /* Текст становится синим */
 }
+
+@keyframes drawLine {
+    to { stroke-dashoffset: 0; }
+}
+
+@keyframes matchPop {
+    0%   { transform: scale(1);    background: yellow; }
+    50%  { transform: scale(1.15); background: #ff9500; }
+    100% { transform: scale(1);    background: orange; }
+}
+
+.card-item.matched {
+    animation: matchPop 0.4s ease;
+    background-color: orange;
+    color: #000;
+}

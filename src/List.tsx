@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react"
+import confetti from 'canvas-confetti'
 
 const pairs = [
     { id: 1, question: 'Name', answer: 'Aleksandr' },
@@ -11,13 +12,23 @@ const pairs = [
     { id: 8, question: "Marital status", answer: "Married" },
 ]
 
-const shuffledAnswers = [...pairs].sort(() => Math.random() - 0.5)
+type Line = {
+    id: number
+    x1: number
+    y1: number
+    x2: number
+    y2: number
+    length: number
+}
 
 export function Lists({ onComplete }: { onComplete: () => void }) {
     const [selectedId, setSelectedId] = useState<number | null>(null)
     const [matched, setMatched] = useState<number[]>([])
     const [currentSection, setCurrentSection] = useState<'game' | 'next'>('game')
-    const [lines, setLines] = useState<{ x1: number, y1: number, x2: number, y2: number }[]>([])
+    const [lines, setLines] = useState<Line[]>([])
+    const [shuffledAnswers] = useState(() =>
+        [...pairs].sort(() => Math.random() - 0.5)
+    )
 
     const containerRef = useRef<HTMLDivElement>(null)
     const questionRefs = useRef<Record<number, HTMLDivElement>>({})
@@ -28,26 +39,41 @@ export function Lists({ onComplete }: { onComplete: () => void }) {
             const questionEl = questionRefs.current[id]
             const answerEl = answerRefs.current[id]
             const containerEl = containerRef.current
-
             if (!questionEl || !answerEl || !containerEl) return null
 
             const containerRect = containerEl.getBoundingClientRect()
             const qRect = questionEl.getBoundingClientRect()
             const aRect = answerEl.getBoundingClientRect()
 
-            return {
-                x1: qRect.right - containerRect.left,
-                y1: qRect.top + qRect.height / 2 - containerRect.top,
-                x2: aRect.left - containerRect.left,
-                y2: aRect.top + aRect.height / 2 - containerRect.top,
-            }
-        }).filter(Boolean) as { x1: number, y1: number, x2: number, y2: number }[]
+            const x1 = qRect.right - containerRect.left
+            const y1 = qRect.top + qRect.height / 2 - containerRect.top
+            const x2 = aRect.left - containerRect.left
+            const y2 = aRect.top + aRect.height / 2 - containerRect.top
+            const length = Math.hypot(x2 - x1, y2 - y1)
+
+            return { id, x1, y1, x2, y2, length }
+        }).filter(Boolean) as Line[]
 
         setLines(newLines)
     }, [matched])
 
+    useEffect(() => {
+        if (matched.length === pairs.length && matched.length > 0) {
+            confetti({ particleCount: 120, spread: 80, origin: { y: 0.6 } })
+        }
+    }, [matched])
+
     function handleQuestionClick(id: number) {
-        setSelectedId(id)
+        if (!matched.includes(id)) setSelectedId(id)  // ✅ нельзя кликнуть на уже совпавший
+    }
+
+    function handleAnswerClick(id: number) {
+        if (selectedId === id) {
+            setMatched(prev => [...prev, id])
+            setSelectedId(null)
+        } else {
+            setSelectedId(null)
+        }
     }
 
     function handleNextClick() {
@@ -57,31 +83,24 @@ export function Lists({ onComplete }: { onComplete: () => void }) {
         onComplete()
     }
 
-    function handleAnswerClick(id: number) {
-        if (selectedId === id) {
-            const newMatched = [...matched, id]
-            setMatched(newMatched)
-            setSelectedId(null)
-        } else {
-            setSelectedId(null)
-        }
-    }
-
     return (
         <>
             {currentSection === 'game' && <h4>Match the facts about me</h4>}
             {currentSection === 'game' && (
                 <div ref={containerRef} className="location">
                     <svg className="svg">
-                        {lines.map((line, index) => (
+                        {lines.map((line) => (
                             <line
-                                key={index}
+                                key={line.id}
                                 x1={line.x1}
                                 y1={line.y1}
                                 x2={line.x2}
                                 y2={line.y2}
                                 stroke="blue"
                                 strokeWidth={2}
+                                strokeDasharray={line.length}
+                                strokeDashoffset={line.length}
+                                style={{ animation: 'drawLine 0.5s ease forwards' }}
                             />
                         ))}
                     </svg>
@@ -93,8 +112,8 @@ export function Lists({ onComplete }: { onComplete: () => void }) {
                                 ref={(el) => { questionRefs.current[item.id] = el! }}
                                 onClick={() => handleQuestionClick(item.id)}
                                 className={`card-item ${
-                                matched.includes(item.id) ? 'matched' :
-                                selectedId === item.id ? 'selected' : ''
+                                    matched.includes(item.id) ? 'matched' :
+                                    selectedId === item.id ? 'selected' : ''
                                 }`}
                             >
                                 {item.question}
@@ -109,7 +128,7 @@ export function Lists({ onComplete }: { onComplete: () => void }) {
                                 ref={(el) => { answerRefs.current[item.id] = el! }}
                                 onClick={() => handleAnswerClick(item.id)}
                                 className={`card-item ${
-                                matched.includes(item.id) ? 'matched' : ''
+                                    matched.includes(item.id) ? 'matched' : ''
                                 }`}
                             >
                                 {item.answer}
